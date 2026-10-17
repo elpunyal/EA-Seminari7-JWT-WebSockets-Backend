@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
 import { config } from './config/config';
 import { Cors } from './middleware/Cors';
 import Logging from './library/Logging';
@@ -13,6 +14,7 @@ import swaggerUi from 'swagger-ui-express'; // permite mostrar Swagger en el nav
 import swaggerDocument from './config/swagger'; // importa el documento que hemos creado en swagger.ts
 import userRoutes from './routes/Users';
 import { StartChat } from './sockets/Chat';
+import { StartComptadorUsuaris } from './sockets/ComptadorUsuaris';
 
 const router = express();
 
@@ -32,12 +34,15 @@ const StartServer = () => {
     router.use(express.urlencoded({ extended: true }));
     router.use(express.json());
 
+    // cookieParser permet llegir req.cookies a qualsevol ruta
+    router.use(cookieParser());
+
     /** CORS */
     router.use(Cors);
 
     /** Routes */
     // Cada router protege sus propias rutas con VerifyToken y RequireRole (ver src/routes/).
-    // /auth es publica: registro, login y refresh.
+    // /auth es publica: registro, login, refresh y logout.
     router.use('/auth', authRoutes);
     router.use('/authors', authorRoutes);
     router.use('/books', bookRoutes);
@@ -75,6 +80,9 @@ const StartServer = () => {
 
     /** Chat (socket.io) */
     StartChat(server);
+
+    /** Comptador d'usuaris connectats en temps real (socket.io) */
+    StartComptadorUsuaris(server);
 
     server.listen(config.server.port, () => Logging.info(`Server is running on port ${config.server.port}`));
 };

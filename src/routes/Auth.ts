@@ -1,19 +1,19 @@
 import express from 'express';
 
 import controller from '../controllers/Auth';
-
 import { Schemas, ValidateJoi } from '../middleware/Joi';
 
-// Rutas de autenticacion. Son publicas: no piden token (refresh se autentica con su propio
-// refresh token, que va en el body). Cada una valida el body con Joi y llama a su controlador.
+// Rutas de autenticacion. Son publicas: no piden token.
+// register y login validan el body con Joi; refresh y logout no necesitan body.
 const router = express.Router();
 router.post('/register', ValidateJoi(Schemas.auth.register), controller.register);
 router.post('/login', ValidateJoi(Schemas.auth.login), controller.login);
-router.post('/refresh', ValidateJoi(Schemas.auth.refresh), controller.refresh);
+router.post('/refresh', controller.refresh);
+router.post('/logout', controller.logout);
 export = router;
 
-// Documentacion de Swagger de las tres rutas.
-// security: [] quita el candado: son las unicas rutas que no necesitan token.
+// Documentacion de Swagger de las rutas de autenticacion.
+// security: [] quita el candado: estas rutas no necesitan access token.
 
 /**
  * @openapi
@@ -41,7 +41,7 @@ export = router;
  *   post:
  *     tags: [Auth]
  *     summary: Inicia sesion
- *     description: Devuelve el access token (para la cabecera Authorization), el refresh token y el usuario.
+ *     description: Retorna l'access token i l'usuari al JSON. El refresh token va en una cookie HttpOnly.
  *     security: []
  *     requestBody:
  *       required: true
@@ -56,20 +56,27 @@ export = router;
  * /auth/refresh:
  *   post:
  *     tags: [Auth]
- *     summary: Pide un access token nuevo
- *     description: Se usa cuando el access token ha caducado. Se envia el refresh token que devolvio el login.
+ *     summary: Demana un access token nou
+ *     description: Llegeix el refresh token de la cookie HttpOnly. Retorna { token }.
  *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema: { $ref: '#/components/schemas/RefreshInput' }
  *     responses:
  *       200:
- *         description: Access token nuevo
+ *         description: Access token nou
  *         content:
  *           application/json:
  *             example: { token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
  *       401: { $ref: '#/components/responses/Unauthorized' }
- *       422: { $ref: '#/components/responses/Unprocessable' }
+ *
+ * /auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Tanca la sessió
+ *     description: Esborra la cookie del refresh token. Retorna 200.
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Sessió tancada
+ *         content:
+ *           application/json:
+ *             example: { message: Sessió tancada }
  */
