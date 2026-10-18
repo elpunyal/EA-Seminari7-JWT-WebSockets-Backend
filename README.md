@@ -1,6 +1,6 @@
 # Seminari 7: backend con JWT y WebSockets
 
-video explicatiu: https://drive.google.com/drive/folders/1X2Z1JDxt2v8RvrsI7TtSkebMihw-Gt7t
+video explicatiu: https://drive.google.com/file/d/1d18lCJ412mAmwMiiSlBwGFa1cbYnMnGl/view?usp=drive_link
 
 API REST con dos recursos, **autores** y **libros**, organizada en capas (rutas, middleware,
 controllers, services y models). Es el backend del Seminario 7 de EA:
